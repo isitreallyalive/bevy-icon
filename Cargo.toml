@@ -12,10 +12,10 @@ name = "image"
 required-features = ["image"]
 
 [dependencies]
-bevy = { version = "0.18", default-features = false }
+bevy = { version = "0.18", default-features = false, features = ["bevy_winit"] }
 bon = "3.8.2"
 image = { version = "0.25.9", optional = true, default-features = false }
 winit = { version = "0.30.12", default-features = false }
 
 [dev-dependencies]
-image = { version = "0.25.9", default-features = false, features = ["jpeg"] }
+image = { version = "0.25.9", default-features = false, features = ["png"] }

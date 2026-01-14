@@ -24,6 +24,7 @@ impl From<Icon> for BevyIconPlugin {
 
 impl Plugin for BevyIconPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(self.icon.clone());
+        app.insert_resource(self.icon.clone())
+            .add_systems(Update, icon::apply.run_if(resource_changed::<Icon>));
     }
 }
