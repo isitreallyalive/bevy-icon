@@ -3,28 +3,33 @@ use bevy::{
     prelude::*,
     winit::{WINIT_WINDOWS, WinitWindows},
 };
-#[cfg(feature = "image")]
 pub use winit::window::BadIcon;
 use winit::window::Icon as WinitIcon;
 
-#[derive(Resource, Clone)]
-pub struct Icon(WinitIcon);
+#[derive(Resource, Clone, Default)]
+pub struct Icon(Option<WinitIcon>);
 
-impl From<WinitIcon> for Icon {
-    fn from(icon: WinitIcon) -> Self {
-        Icon(icon)
+impl Icon {
+    /// No icon
+    pub const NONE: Self = Self(None);
+
+    /// Creates an icon from 32bpp RGBA data.
+    ///
+    /// The length of `rgba` must be divisible by 4, and `width * height` must equal
+    /// `rgba.len() / 4`. Otherwise, this will return a `BadIcon` error.
+    pub fn from_rgba(rgba: Vec<u8>, width: u32, height: u32) -> Result<Self, BadIcon> {
+        Ok(Icon(Some(WinitIcon::from_rgba(rgba, width, height)?)))
     }
 }
 
-impl Icon {
-    #[cfg(feature = "image")]
-    pub fn from_image(img: image::DynamicImage) -> Result<Self, BadIcon> {
+#[cfg(feature = "image")]
+impl From<image::DynamicImage> for Icon {
+    fn from(image: image::DynamicImage) -> Self {
         use image::GenericImageView;
-
-        let rgba = img.to_rgba8().into_raw();
-        let (width, height) = img.dimensions();
-
-        Ok(Icon(WinitIcon::from_rgba(rgba, width, height)?))
+        
+        let rgba = image.to_rgba8().into_raw();
+        let (width, height) = image.dimensions();
+        Icon::from_rgba(rgba, width, height).unwrap_or_default()
     }
 }
 
@@ -38,7 +43,7 @@ pub(crate) fn apply(
             return;
         }
         for window in windows.values() {
-            window.set_window_icon(Some(icon.0.clone()));
+            window.set_window_icon(icon.0.clone());
         }
     });
 }

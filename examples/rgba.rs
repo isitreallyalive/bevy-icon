@@ -2,15 +2,17 @@ use std::sync::LazyLock;
 
 use bevy::prelude::*;
 use bevy_icon::prelude::*;
+use image::GenericImageView;
 
 macro_rules! load_icon {
-    ($path:expr) => {
-        Icon::from_image(
-            image::load_from_memory(include_bytes!($path))
-                .expect(concat!("failed to load ", $path)),
-        )
-        .expect(concat!("failed to create icon from ", $path))
-    };
+    ($path:expr) => {{
+        let image = image::load_from_memory(include_bytes!($path))
+            .expect(concat!("failed to load ", $path));
+        let rgba = image.to_rgba8().into_raw();
+        let (width, height) = image.dimensions();
+
+        Icon::from_rgba(rgba, width, height).expect(concat!("failed to create icon from ", $path))
+    }};
 }
 
 const CAT_ICON: LazyLock<Icon> = LazyLock::new(|| load_icon!("cat.png"));
@@ -33,7 +35,7 @@ struct IsCat(bool);
 fn main() -> Result<()> {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(BevyIconPlugin::builder(CAT_ICON.clone()).build())
+        .add_plugins(BevyIconPlugin::new(CAT_ICON.clone()))
         // change icon every second
         .add_systems(FixedUpdate, change)
         .insert_resource(Time::from_seconds(1.))
