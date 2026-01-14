@@ -3,4 +3,19 @@ name = "bevy-icon"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = ["image"]
+image = ["dep:image"]
+
+[[example]]
+name = "image"
+required-features = ["image"]
+
 [dependencies]
+bevy = { version = "0.18", default-features = false }
+bon = "3.8.2"
+image = { version = "0.25.9", optional = true, default-features = false }
+winit = { version = "0.30.12", default-features = false }
+
+[dev-dependencies]
+image = { version = "0.25.9", default-features = false, features = ["jpeg"] }
